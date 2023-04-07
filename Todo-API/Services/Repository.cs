@@ -34,7 +34,7 @@ namespace Todo_API.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<bool> TodoItemExistsAsync(int itemId)
+        public async Task<bool> TodoItemExistsAsync(long itemId)
         {
             return await _context.TodoItems.AnyAsync(ti => ti.Id == itemId);
         }

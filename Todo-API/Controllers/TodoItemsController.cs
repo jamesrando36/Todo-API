@@ -64,7 +64,7 @@ namespace Todo_API.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <param name="todoItem"></param>
-        /// <returns>an updated todo iteam</returns>
+        /// <returns>an updated todo item</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTodoItem(long id, TodoItemUpdateDto todoItemUpdate)
         {
@@ -112,21 +112,28 @@ namespace Todo_API.Controllers
                  createdTodoItem);
         }
 
-        // DELETE: api/TodoItems/5
+        /// <summary>
+        /// Deletes a single to do item from the collection
+        /// </summary>
+        /// <param name="id"> id of todo item </param>
+        /// <returns> deleted todo item </returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTodoItem(long id)
         {
-            if (_context.TodoItems == null)
+            if (!await _repository.TodoItemExistsAsync(id))
             {
                 return NotFound();
             }
+
             var todoItem = await _context.TodoItems.FindAsync(id);
+
             if (todoItem == null)
             {
                 return NotFound();
             }
 
             _context.TodoItems.Remove(todoItem);
+
             await _context.SaveChangesAsync();
 
             return NoContent();

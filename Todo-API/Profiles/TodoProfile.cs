@@ -12,7 +12,6 @@ namespace Todo_API.Profiles
             CreateMap<Entities.TodoItem, TodoItemCreateDto>();
             CreateMap<TodoItemUpdateDto, Entities.TodoItem>();
             CreateMap<Entities.TodoItem, TodoItemUpdateDto>();
-
         }
     }
 }
