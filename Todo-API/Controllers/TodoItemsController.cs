@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Todo_API.Entities;
-using Todo_API.Models;
+using Todo_API.Models.TodoItemDtos;
 using Todo_API.Services;
 using TodoApi.Models;
 
@@ -13,106 +13,103 @@ namespace Todo_API.Controllers
     {
         private readonly TodoContext _context;
         private readonly IRepository _repository;
+        private readonly IMapper _mapper;
 
-        public TodoItemsController
-        (
-            TodoContext context,
-            IRepository repository
-        )
+        public TodoItemsController(TodoContext context,
+            IRepository repository,
+            IMapper mapper)
         {
-            _context = context;
-            _repository = repository;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        // GET: api/TodoItems
+        /// <summary>
+        /// Get all todo items
+        /// </summary>
+        /// <returns> all todo items</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TodoItemDTO>>> GetTodoItems()
+        public async Task<ActionResult<IEnumerable<TodoItemDto>>> GetTodoItems()
         {
-          if (_context.TodoItems == null)
-          {
-              return NotFound();
-          }
-
-          var todoItems = await _repository.GetTodoItemsAsync();
-
-          var result = new List<TodoItemDTO>();
-
-            foreach ( var item in todoItems )
+            if (_context.TodoItems == null)
             {
-                result.Add(new TodoItemDTO
-                {
-                    Id = item.Id,
-                    Task = item.Task,
-                    IsComplete = item.IsComplete
-
-                });
+                return NotFound();
             }
 
-            return Ok(result);
+            var todoItems = await _repository.GetTodoItemsAsync();
+
+            return Ok(_mapper.Map<IEnumerable<TodoItemDto>>(todoItems));
         }
 
-        // GET: api/TodoItems/5
+        /// <summary>
+        /// Get a single todo item
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns> a single todo item </returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<TodoItem>> GetTodoItem(long id)
+        public async Task<ActionResult<TodoItemDto>> GetTodoItem(long id)
         {
-          if (_context.TodoItems == null)
-          {
-              return NotFound();
-          }
-            var todoItem = await _context.TodoItems.FindAsync(id);
+            var todoItem = await _repository.GetTodoItemAsync(id);
 
             if (todoItem == null)
             {
                 return NotFound();
             }
 
-            return todoItem;
+            return Ok(_mapper.Map<IEnumerable<TodoItemDto>>(todoItem));
         }
 
-        // PUT: api/TodoItems/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Update a todo item
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="todoItem"></param>
+        /// <returns>an updated todo iteam</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutTodoItem(long id, TodoItem todoItem)
+        public async Task<IActionResult> PutTodoItem(long id, TodoItemUpdateDto todoItemUpdate)
         {
-            if (id != todoItem.Id)
+            if (!await _repository.TodoItemExistsAsync(id))
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(todoItem).State = EntityState.Modified;
+            var todoItemEntity = await _repository
+                .GetTodoItemAsync(id);
 
-            try
+
+            if (todoItemEntity == null)
             {
-                await _context.SaveChangesAsync();
+                return NotFound();
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TodoItemExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+
+            _mapper.Map(todoItemUpdate, todoItemEntity);
+
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        // POST: api/TodoItems
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Create a new todo item
+        /// </summary>
+        /// <param name="todoItemCreateDto"></param>
+        /// <returns> Created todo item </returns>
         [HttpPost]
-        public async Task<ActionResult<TodoItem>> PostTodoItem(TodoItem todoItem)
+        public async Task<ActionResult<TodoItemDto>> CreateTodoItem(TodoItemCreateDto todoItemCreateDto)
         {
-          if (_context.TodoItems == null)
-          {
-              return Problem("Entity set 'TodoContext.TodoItems'  is null.");
-          }
-            _context.TodoItems.Add(todoItem);
-            await _context.SaveChangesAsync();
+            var todoitem = _mapper.Map<TodoItem>(todoItemCreateDto);
 
-            return CreatedAtAction(nameof(GetTodoItem), new { id = todoItem.Id }, todoItem);
+            await _repository.CreateTodoItemAsync(todoitem);
+
+            var createdTodoItem =
+                _mapper.Map<TodoItem>(todoitem);
+
+            return CreatedAtRoute(
+                 new
+                 {
+                     id = todoitem.Id,
+                 },
+                 createdTodoItem);
         }
 
         // DELETE: api/TodoItems/5
@@ -133,11 +130,6 @@ namespace Todo_API.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        private bool TodoItemExists(long id)
-        {
-            return (_context.TodoItems?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

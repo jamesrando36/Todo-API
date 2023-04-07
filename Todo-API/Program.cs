@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Todo_API.Services;
 using TodoApi.Models;
@@ -15,6 +16,8 @@ builder.Services.AddDbContext<TodoContext>(
 
 builder.Services.AddScoped<IRepository, Repository>();
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -25,7 +28,7 @@ app.UseAuthorization();
 
 app.UseSwagger();
 
-app.UseSwaggerUI( options =>
+app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
     options.RoutePrefix = string.Empty;
