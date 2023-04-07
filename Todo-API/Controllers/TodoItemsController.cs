@@ -49,6 +49,11 @@ namespace Todo_API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<TodoItemDto>> GetTodoItem(long id)
         {
+            if (!await _repository.TodoItemExistsAsync(id))
+            {
+                return NotFound();
+            }
+
             var todoItem = await _repository.GetTodoItemAsync(id);
 
             if (todoItem == null)
@@ -56,7 +61,7 @@ namespace Todo_API.Controllers
                 return NotFound();
             }
 
-            return Ok(_mapper.Map<IEnumerable<TodoItemDto>>(todoItem));
+            return Ok(_mapper.Map<TodoItemDto>(todoItem));
         }
 
         /// <summary>
