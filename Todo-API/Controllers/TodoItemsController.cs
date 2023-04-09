@@ -130,16 +130,7 @@ namespace Todo_API.Controllers
                 return NotFound();
             }
 
-            var todoItem = await _context.TodoItems.FindAsync(id);
-
-            if (todoItem == null)
-            {
-                return NotFound();
-            }
-
-            _context.TodoItems.Remove(todoItem);
-
-            await _context.SaveChangesAsync();
+            await _repository.DeleteTodoItemAsync(id);
 
             return NoContent();
         }

@@ -34,6 +34,15 @@ namespace Todo_API.Services
             await _context.SaveChangesAsync();
         }
 
+        public async Task DeleteTodoItemAsync(long id)
+        {
+            var todoItem = await _context.TodoItems.FindAsync(id);
+
+            _context.TodoItems.Remove(todoItem);
+
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<bool> TodoItemExistsAsync(long itemId)
         {
             return await _context.TodoItems.AnyAsync(ti => ti.Id == itemId);

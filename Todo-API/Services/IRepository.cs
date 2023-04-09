@@ -19,11 +19,18 @@ namespace Todo_API.Services
         Task<TodoItem?> GetTodoItemAsync(long id);
 
         /// <summary>
-        /// 
+        /// Creates a single todo item
         /// </summary>
         /// <param name="item"></param>
-        /// <returns></returns>
+        /// <returns>the new created todo item</returns>
         Task CreateTodoItemAsync(TodoItem item);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        Task DeleteTodoItemAsync(long id);
 
         /// <summary>
         /// Checks that a todo item exists
@@ -31,8 +38,5 @@ namespace Todo_API.Services
         /// <param name="itemId"></param>
         /// <returns> true if exists </returns>
         Task<bool> TodoItemExistsAsync(long itemId);
-
-
-
     }
 }
