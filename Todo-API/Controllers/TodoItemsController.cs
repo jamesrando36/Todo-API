@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Todo_API.Entities;
+using Todo_API.Exceptions;
 using Todo_API.Models.TodoItemDtos;
 using Todo_API.Services;
 using TodoApi.Models;
@@ -31,12 +32,12 @@ namespace Todo_API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TodoItemDto>>> GetTodoItems()
         {
-            if (_context.TodoItems == null)
-            {
-                return NotFound();
-            }
-
             var todoItems = await _repository.GetTodoItemsAsync();
+
+            if (todoItems == null)
+            {
+                throw new NotFoundException("There are no todo items currently, please create an todo item and try again");
+            }
 
             return Ok(_mapper.Map<IEnumerable<TodoItemDto>>(todoItems));
         }
@@ -51,15 +52,10 @@ namespace Todo_API.Controllers
         {
             if (!await _repository.TodoItemExistsAsync(id))
             {
-                return NotFound();
+                throw new NotFoundException("This todo item does not exist, please enter correct id, and try again");
             }
 
             var todoItem = await _repository.GetTodoItemAsync(id);
-
-            if (todoItem == null)
-            {
-                return NotFound();
-            }
 
             return Ok(_mapper.Map<TodoItemDto>(todoItem));
         }
@@ -75,17 +71,11 @@ namespace Todo_API.Controllers
         {
             if (!await _repository.TodoItemExistsAsync(id))
             {
-                return NotFound();
+                throw new NotFoundException("This todo item does not exist, please enter correct id, and try again");
             }
 
             var todoItemEntity = await _repository
                 .GetTodoItemAsync(id);
-
-
-            if (todoItemEntity == null)
-            {
-                return NotFound();
-            }
 
             _mapper.Map(todoItemUpdate, todoItemEntity);
 
@@ -127,7 +117,7 @@ namespace Todo_API.Controllers
         {
             if (!await _repository.TodoItemExistsAsync(id))
             {
-                return NotFound();
+                throw new NotFoundException("This todo item does not exist, please enter correct id, and try again");
             }
 
             await _repository.DeleteTodoItemAsync(id);

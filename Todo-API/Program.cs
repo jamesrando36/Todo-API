@@ -1,5 +1,5 @@
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Todo_API.Exceptions.Config;
 using Todo_API.Services;
 using TodoApi.Models;
 
@@ -27,6 +27,8 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.UseSwagger();
+
+app.AddGlobalErrorHandler();
 
 app.UseSwaggerUI(options =>
 {
