@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Todo_API.Entities;
 using Todo_API.Exceptions;
@@ -78,6 +79,30 @@ namespace Todo_API.Controllers
                 .GetTodoItemAsync(id);
 
             _mapper.Map(todoItemUpdate, todoItemEntity);
+
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [HttpPatch("{id}")]
+        public async Task<ActionResult> PartiallyUpdatePointOfInterest(long id,
+           JsonPatchDocument<TodoItemUpdateDto> patchDocument)
+        {
+            if (!await _repository.TodoItemExistsAsync(id))
+            {
+                throw new NotFoundException("This todo item does not exist, please enter correct id, and try again");
+            }
+
+            var todoItemEntity = await _repository
+                .GetTodoItemAsync(id);
+
+            var todoItemToPatch = _mapper.Map<TodoItemUpdateDto>(
+                todoItemEntity);
+
+            patchDocument.ApplyTo(todoItemToPatch);
+
+            _mapper.Map(todoItemToPatch, todoItemEntity);
 
             await _context.SaveChangesAsync();
 
