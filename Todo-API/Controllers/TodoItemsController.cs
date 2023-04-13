@@ -85,6 +85,13 @@ namespace Todo_API.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        ///  Partial update for a todo item
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="patchDocument"></param>
+        /// <returns>an updated todo item</returns>
+        /// <exception cref="NotFoundException"></exception>
         [HttpPatch("{id}")]
         public async Task<ActionResult> PartiallyUpdatePointOfInterest(long id,
            JsonPatchDocument<TodoItemUpdateDto> patchDocument)
