@@ -44,6 +44,24 @@ namespace Todo_API.Controllers
         }
 
         /// <summary>
+        /// Get all filtered tasks via filter
+        /// </summary>
+        /// <returns> all filtered task items</returns>
+        [Route("filter")]
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<TodoItemDto>>> GetTodoItems(string? task, string? search)
+        {
+            var todoItems = await _repository.GetFilteredTaskAsync(task, search);
+
+            if (todoItems == null)
+            {
+                throw new NotFoundException("There are no todo items currently, please create an todo item and try again");
+            }
+
+            return Ok(_mapper.Map<IEnumerable<TodoItemDto>>(todoItems));
+        }
+
+        /// <summary>
         /// Get a single todo item
         /// </summary>
         /// <param name="id"></param>

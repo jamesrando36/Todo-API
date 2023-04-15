@@ -19,6 +19,12 @@ namespace Todo_API.Services
         Task<TodoItem?> GetTodoItemAsync(long id);
 
         /// <summary>
+        /// Get filtered tasks
+        /// </summary>
+        /// <returns> a list of filtered tasks</returns>
+        Task<IEnumerable<TodoItem>> GetFilteredTaskAsync(string? task, string? search);
+
+        /// <summary>
         /// Creates a single todo item
         /// </summary>
         /// <param name="item"></param>
