@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Todo_API.Entities;
@@ -9,6 +10,7 @@ using TodoApi.Models;
 
 namespace Todo_API.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TodoItemsController : ControllerBase
@@ -48,6 +50,7 @@ namespace Todo_API.Controllers
         /// </summary>
         /// <returns> all filtered task items</returns>
         [Route("filter")]
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TodoItemDto>>> GetTodoItems(string? task, string? search)
         {
