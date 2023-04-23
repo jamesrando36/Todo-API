@@ -50,7 +50,6 @@ namespace Todo_API.Controllers
         /// </summary>
         /// <returns> all filtered task items</returns>
         [Route("filter")]
-        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TodoItemDto>>> GetTodoItems(string? task, string? search)
         {
