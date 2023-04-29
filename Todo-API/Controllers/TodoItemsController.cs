@@ -15,15 +15,12 @@ namespace Todo_API.Controllers
     [ApiController]
     public class TodoItemsController : ControllerBase
     {
-        private readonly TodoContext _context;
         private readonly IRepository _repository;
         private readonly IMapper _mapper;
 
-        public TodoItemsController(TodoContext context,
-            IRepository repository,
+        public TodoItemsController(IRepository repository,
             IMapper mapper)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
@@ -100,7 +97,7 @@ namespace Todo_API.Controllers
 
             _mapper.Map(todoItemUpdate, todoItemEntity);
 
-            await _context.SaveChangesAsync();
+            await _repository.SaveChangesAsync();
 
             return NoContent();
         }
@@ -131,7 +128,7 @@ namespace Todo_API.Controllers
 
             _mapper.Map(todoItemToPatch, todoItemEntity);
 
-            await _context.SaveChangesAsync();
+            await _repository.SaveChangesAsync();
 
             return NoContent();
         }

@@ -44,5 +44,11 @@ namespace Todo_API.Services
         /// <param name="itemId"></param>
         /// <returns> true if exists </returns>
         Task<bool> TodoItemExistsAsync(long itemId);
+
+        /// <summary>
+        /// Saves ef data changes to the db
+        /// </summary>
+        /// <returns>saved change to the db</returns>
+        Task<bool> SaveChangesAsync();
     }
 }

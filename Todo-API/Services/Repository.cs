@@ -74,5 +74,10 @@ namespace Todo_API.Services
         {
             return await _context.TodoItems.AnyAsync(ti => ti.Id == itemId);
         }
+
+        public async Task<bool> SaveChangesAsync()
+        {
+            return (await _context.SaveChangesAsync() >= 0);
+        }
     }
 }
