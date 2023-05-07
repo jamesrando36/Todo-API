@@ -6,23 +6,27 @@ using Todo_API.Entities;
 using Todo_API.Exceptions;
 using Todo_API.Models.TodoItemDtos;
 using Todo_API.Services;
-using TodoApi.Models;
+using ILogger = Serilog.ILogger;
 
 namespace Todo_API.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TodoItemsController : ControllerBase
     {
         private readonly IRepository _repository;
         private readonly IMapper _mapper;
+        private readonly ILogger _logger;
 
-        public TodoItemsController(IRepository repository,
-            IMapper mapper)
+        public TodoItemsController(
+            IRepository repository,
+            IMapper mapper,
+            ILogger logger)
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
@@ -30,16 +34,27 @@ namespace Todo_API.Controllers
         /// </summary>
         /// <returns> all todo items</returns>
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<TodoItemDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<IEnumerable<TodoItemDto>>> GetTodoItems()
         {
-            var todoItems = await _repository.GetTodoItemsAsync();
-
-            if (todoItems == null)
+            try
             {
-                throw new NotFoundException("There are no todo items currently, please create an todo item and try again");
-            }
+                var todoItems = await _repository.GetTodoItemsAsync();
 
-            return Ok(_mapper.Map<IEnumerable<TodoItemDto>>(todoItems));
+                if (!todoItems.Any())
+                {
+                    _logger.Error("No todo items found in the repository");
+                    return NotFound();
+                }
+
+                return Ok(_mapper.Map<IEnumerable<TodoItemDto>>(todoItems));
+            }
+            catch (NotFoundException ex) 
+            {
+                _logger.Error(ex, $"An error occurred while getting the todo items.");// clean errors into their own class
+                return NotFound(ex.Message);
+            }
         }
 
         /// <summary>
@@ -66,16 +81,37 @@ namespace Todo_API.Controllers
         /// <param name="id"></param>
         /// <returns> a single todo item </returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<TodoItemDto>> GetTodoItem(long id)
+        [ProducesResponseType(typeof(TodoItemDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetTodoItem(long id)
         {
-            if (!await _repository.TodoItemExistsAsync(id))
+            try
             {
-                throw new NotFoundException("This todo item does not exist, please enter correct id, and try again");
+                if (!await _repository.TodoItemExistsAsync(id))
+                {
+                    throw new NotFoundException($"Todo item with ID {id} does not exist, please enter correct id, and try again");
+                }
+
+                var todoItem = await _repository.GetTodoItemAsync(id);
+
+                if (todoItem == null)
+                {
+                    throw new Exception($"Failed to get the todo item with ID {id}.");
+                }
+
+                return Ok(_mapper.Map<TodoItemDto>(todoItem));
             }
-
-            var todoItem = await _repository.GetTodoItemAsync(id);
-
-            return Ok(_mapper.Map<TodoItemDto>(todoItem));
+            catch (NotFoundException ex)
+            {
+                _logger.Error(ex, $"Todo item with ID {id} does not exist.");
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "An error occurred while getting the todo item.");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while getting the todo item with ID {id}.");
+            }
         }
 
         /// <summary>

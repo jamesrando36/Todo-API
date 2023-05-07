@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System.Text;
 using Todo_API.Configurations;
 using Todo_API.Exceptions.Config;
@@ -56,6 +57,15 @@ builder.Services.AddScoped<IRepository, Repository>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Console()
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
+builder.Services.AddSingleton(Log.Logger);
+
 builder.Services.AddSwaggerGen(setup =>
 {
     // Include 'SecurityScheme' to use JWT Authentication
@@ -81,7 +91,6 @@ builder.Services.AddSwaggerGen(setup =>
     {
         { jwtSecurityScheme, Array.Empty<string>() }
     });
-
 });
 
 var app = builder.Build();
@@ -90,11 +99,13 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
- app.UseAuthentication();
+app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.UseSwagger();
+
+app.UseSerilogRequestLogging();
 
 app.AddGlobalErrorHandler();
 
