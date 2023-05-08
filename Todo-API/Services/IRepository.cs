@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Todo_API.Entities;
+﻿using Todo_API.Entities;
 
 namespace Todo_API.Services
 {
@@ -32,11 +31,17 @@ namespace Todo_API.Services
         Task CreateTodoItemAsync(TodoItem item);
 
         /// <summary>
-        /// 
+        /// Delete a single todo item
         /// </summary>
         /// <param name="id"></param>
-        /// <returns></returns>
+        /// <returns>deleted todo item</returns>
         Task DeleteTodoItemAsync(long id);
+
+        /// <summary>
+        /// Delete all single todo items
+        /// </summary>
+        /// <returns>deleted todo items</returns>
+        Task DeleteAllTodoItemsAsync();
 
         /// <summary>
         /// Checks that a todo item exists

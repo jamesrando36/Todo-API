@@ -1,17 +1,17 @@
-
-
 using AutoFixture;
 using AutoMapper;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Serilog;
+using Todo_API.Constants.ErrorMessages;
 using Todo_API.Controllers;
 using Todo_API.Entities;
 using Todo_API.Models.TodoItemDtos;
 using Todo_API.Profiles;
 using Todo_API.Services;
 using Xunit;
+using Xunit.Sdk;
 using Assert = Xunit.Assert;
 
 namespace Todo_API_Test.Controllers
@@ -143,7 +143,7 @@ namespace Todo_API_Test.Controllers
 
             // Assert
             Assert.Equal(404, obj.StatusCode);
-            Assert.Equal($"Todo item with ID {todoItemId} does not exist, please enter correct id, and try again", obj.Value);
+            Assert.Equal(ErrorMessages.InvalidId, obj.Value);
         }
 
         [Fact]

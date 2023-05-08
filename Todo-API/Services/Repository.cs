@@ -70,6 +70,15 @@ namespace Todo_API.Services
             await _context.SaveChangesAsync();
         }
 
+        public async Task DeleteAllTodoItemsAsync()
+        {
+            var todoItems = await _context.TodoItems.ToListAsync();
+
+            _context.TodoItems.RemoveRange(todoItems);
+
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<bool> TodoItemExistsAsync(long itemId)
         {
             return await _context.TodoItems.AnyAsync(ti => ti.Id == itemId);

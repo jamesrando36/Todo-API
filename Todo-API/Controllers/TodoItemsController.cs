@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Todo_API.Constants.ErrorMessages;
 using Todo_API.Entities;
 using Todo_API.Exceptions;
 using Todo_API.Models.TodoItemDtos;
@@ -10,7 +11,6 @@ using ILogger = Serilog.ILogger;
 
 namespace Todo_API.Controllers
 {
-    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TodoItemsController : ControllerBase
@@ -44,7 +44,6 @@ namespace Todo_API.Controllers
 
                 if (!todoItems.Any())
                 {
-                    _logger.Error("No todo items found in the repository");
                     return NotFound();
                 }
 
@@ -52,7 +51,7 @@ namespace Todo_API.Controllers
             }
             catch (NotFoundException ex) 
             {
-                _logger.Error(ex, $"An error occurred while getting the todo items.");// clean errors into their own class
+                _logger.Error(ex, ErrorMessages.ItemNotFound);
                 return NotFound(ex.Message);
             }
         }
@@ -69,7 +68,7 @@ namespace Todo_API.Controllers
 
             if (todoItems == null)
             {
-                throw new NotFoundException("There are no todo items currently, please create an todo item and try again");
+                throw new NotFoundException(ErrorMessages.ItemNotFound);
             }
 
             return Ok(_mapper.Map<IEnumerable<TodoItemDto>>(todoItems));
@@ -90,7 +89,7 @@ namespace Todo_API.Controllers
             {
                 if (!await _repository.TodoItemExistsAsync(id))
                 {
-                    throw new NotFoundException($"Todo item with ID {id} does not exist, please enter correct id, and try again");
+                    throw new NotFoundException(ErrorMessages.InvalidId);
                 }
 
                 var todoItem = await _repository.GetTodoItemAsync(id);
@@ -109,7 +108,7 @@ namespace Todo_API.Controllers
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "An error occurred while getting the todo item.");
+                _logger.Error(ex, ErrorMessages.ItemError);
                 return StatusCode(StatusCodes.Status500InternalServerError, $"An error occurred while getting the todo item with ID {id}.");
             }
         }
@@ -121,21 +120,33 @@ namespace Todo_API.Controllers
         /// <param name="todoItem"></param>
         /// <returns>an updated todo item</returns>
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [Authorize]
         public async Task<IActionResult> PutTodoItem(long id, TodoItemUpdateDto todoItemUpdate)
         {
             if (!await _repository.TodoItemExistsAsync(id))
             {
-                throw new NotFoundException("This todo item does not exist, please enter correct id, and try again");
+                throw new NotFoundException(ErrorMessages.InvalidId);
             }
 
             var todoItemEntity = await _repository
                 .GetTodoItemAsync(id);
 
-            _mapper.Map(todoItemUpdate, todoItemEntity);
+            try
+            {
+                _mapper.Map(todoItemUpdate, todoItemEntity);
 
-            await _repository.SaveChangesAsync();
+                await _repository.SaveChangesAsync();
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"An error occurred while updating todo item {id}");
+                
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
 
         /// <summary>
@@ -146,27 +157,44 @@ namespace Todo_API.Controllers
         /// <returns>an updated todo item</returns>
         /// <exception cref="NotFoundException"></exception>
         [HttpPatch("{id}")]
-        public async Task<ActionResult> PartiallyUpdatePointOfInterest(long id,
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> PartiallyUpdatePointOfInterest(long id,
            JsonPatchDocument<TodoItemUpdateDto> patchDocument)
         {
             if (!await _repository.TodoItemExistsAsync(id))
             {
-                throw new NotFoundException("This todo item does not exist, please enter correct id, and try again");
+                throw new NotFoundException(ErrorMessages.InvalidId);
             }
 
             var todoItemEntity = await _repository
                 .GetTodoItemAsync(id);
 
-            var todoItemToPatch = _mapper.Map<TodoItemUpdateDto>(
-                todoItemEntity);
+            try
+            {
+                var todoItemToPatch = _mapper.Map<TodoItemUpdateDto>(todoItemEntity);
 
-            patchDocument.ApplyTo(todoItemToPatch);
+                patchDocument.ApplyTo(todoItemToPatch, ModelState);
 
-            _mapper.Map(todoItemToPatch, todoItemEntity);
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
 
-            await _repository.SaveChangesAsync();
+                _mapper.Map(todoItemToPatch, todoItemEntity);
 
-            return NoContent();
+                await _repository.SaveChangesAsync();
+
+                return NoContent();
+
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"An error occurred while updating todo item {id}");
+
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            } 
         }
 
         /// <summary>
@@ -175,21 +203,28 @@ namespace Todo_API.Controllers
         /// <param name="todoItemCreateDto"></param>
         /// <returns> Created todo item </returns>
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<TodoItemDto>> CreateTodoItem(TodoItemCreateDto todoItemCreateDto)
         {
-            var todoitem = _mapper.Map<TodoItem>(todoItemCreateDto);
+            try
+            {
+                var todoitem = _mapper.Map<TodoItem>(todoItemCreateDto);
 
-            await _repository.CreateTodoItemAsync(todoitem);
+                await _repository.CreateTodoItemAsync(todoitem);
 
-            var createdTodoItem =
-                _mapper.Map<TodoItem>(todoitem);
+                var createdTodoItem =
+                    _mapper.Map<TodoItem>(todoitem);
 
-            return CreatedAtRoute(
-                 new
-                 {
-                     id = todoitem.Id,
-                 },
-                 createdTodoItem);
+                return CreatedAtRoute(new { id = todoitem.Id }, createdTodoItem);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"An error occurred while creating todo item, {todoItemCreateDto.Task}");
+
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
 
         /// <summary>
@@ -198,16 +233,57 @@ namespace Todo_API.Controllers
         /// <param name="id"> id of todo item </param>
         /// <returns> deleted todo item </returns>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteTodoItem(long id)
         {
-            if (!await _repository.TodoItemExistsAsync(id))
+            try
             {
-                throw new NotFoundException("This todo item does not exist, please enter correct id, and try again");
+                if (!await _repository.TodoItemExistsAsync(id))
+                {
+                    throw new NotFoundException(ErrorMessages.InvalidId);
+                }
+
+                await _repository.DeleteTodoItemAsync(id);
+
+                return NoContent();
             }
+            catch (NotFoundException ex)
+            {
+                _logger.Error(ex, $"Todo item with ID {id} does not exist.");
 
-            await _repository.DeleteTodoItemAsync(id);
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"An error occurred while deleting todo item {id}");
 
-            return NoContent();
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
+        /// <summary>
+        /// Deletes all todo items
+        /// </summary>
+        /// <returns>removed todo items</returns>
+        [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DeleteAllTodoItems()
+        {
+            try
+            {
+                await _repository.DeleteAllTodoItemsAsync();
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "An error occurred while deleting all todo items.");
+
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
         }
     }
 }
