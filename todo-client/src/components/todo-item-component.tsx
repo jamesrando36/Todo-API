@@ -6,12 +6,25 @@ import {
   ListItem,
   ListItemText,
   Typography,
+  makeStyles,
 } from "@material-ui/core";
 import { TodoItem } from "../interfaces/TodoItem";
 import AddTaskForm from "./add-todo-item-component";
 import DeleteTaskModal from "./delete-todo-item-component";
 
+const useStyles = makeStyles((theme) => ({
+  container: {
+    marginTop: theme.spacing(4),
+    marginBottom: theme.spacing(4),
+  },
+  title: {
+    marginBottom: theme.spacing(2),
+  },
+}));
+
 function TodoList() {
+  const classes = useStyles();
+
   const [todoItems, setTodoItems] = useState<TodoItem[]>([]);
 
   const handleAddTask = (newTask: TodoItem) => {
@@ -32,8 +45,8 @@ function TodoList() {
   }, []);
 
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h4" align="center" gutterBottom>
+    <Container maxWidth="sm" className={classes.container}>
+      <Typography variant="h4" align="center" gutterBottom className={classes.title}>
         Todo List
       </Typography>
 
@@ -44,7 +57,6 @@ function TodoList() {
           <ListItem key={item.id}>
             <ListItemText primary={item.task} secondary={item.description} />
             <DeleteTaskModal taskId={item.id} onConfirm={handleDeleteTask} />
-
           </ListItem>
         ))}
       </List>

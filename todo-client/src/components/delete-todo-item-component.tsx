@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import { IconButton, Modal, Typography, Button } from "@material-ui/core";
 import DeleteIcon from "@material-ui/icons/Delete";
+import axios from "axios";
 
 function DeleteTaskModal({
   taskId,
   onConfirm,
 }: {
   taskId: any;
-  onConfirm: any;
+  onConfirm: (taskId: number) => void;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -19,9 +20,15 @@ function DeleteTaskModal({
     setOpen(false);
   };
 
-  const handleConfirm = () => {
-    onConfirm(taskId);
-    handleClose();
+  const handleConfirm = async () => {
+    try {
+      await axios.delete(`https://localhost:7083/api/TodoItems/${taskId}`);
+      onConfirm(taskId);
+    } catch (error) {
+      console.error("Error deleting task:", error);
+    } finally {
+      handleClose();
+    }
   };
 
   return (

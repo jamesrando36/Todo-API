@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo-API", "Todo-API\Todo-A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo-API-Test", "Todo-API-Test\Todo-API-Test.csproj", "{B92F6A8C-321C-43AE-B747-57DEB3DFCD5B}"
 EndProject
-Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "todo-client", "Todo-Client\todo-client.esproj", "{B777F020-E5D1-4DD8-A56F-8039A99F7388}"
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "Todo-Client", "Todo-Client\Todo-Client.esproj", "{B777F020-E5D1-4DD8-A56F-8039A99F7388}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
