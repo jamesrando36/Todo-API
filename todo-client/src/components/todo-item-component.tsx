@@ -1,30 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import {
-  Container,
-  List,
-  ListItem,
-  ListItemText,
-  Typography,
-  makeStyles,
-} from "@material-ui/core";
 import { TodoItem } from "../interfaces/TodoItem";
 import AddTaskForm from "./add-todo-item-component";
 import DeleteTaskModal from "./delete-todo-item-component";
-
-const useStyles = makeStyles((theme) => ({
-  container: {
-    marginTop: theme.spacing(4),
-    marginBottom: theme.spacing(4),
-  },
-  title: {
-    marginBottom: theme.spacing(2),
-  },
-}));
+import { Container, Typography, List, ListItem, ListItemText } from "@mui/material";
 
 function TodoList() {
-  const classes = useStyles();
-
   const [todoItems, setTodoItems] = useState<TodoItem[]>([]);
 
   const handleAddTask = (newTask: TodoItem) => {
@@ -45,8 +26,8 @@ function TodoList() {
   }, []);
 
   return (
-    <Container maxWidth="sm" className={classes.container}>
-      <Typography variant="h4" align="center" gutterBottom className={classes.title}>
+    <Container maxWidth="sm" style={{ marginTop: "1em", marginBottom: "1em" }}>
+      <Typography variant="h4" align="center" gutterBottom>
         Todo List
       </Typography>
 

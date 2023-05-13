@@ -1,7 +1,7 @@
-import React, { useState } from "react";
-import { IconButton, Modal, Typography, Button } from "@material-ui/core";
-import DeleteIcon from "@material-ui/icons/Delete";
+import { useState } from "react";
 import axios from "axios";
+import { IconButton, Modal, Typography, Button } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 function DeleteTaskModal({
   taskId,

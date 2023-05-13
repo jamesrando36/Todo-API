@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Button, TextField, Typography } from "@material-ui/core";
+import { Typography, TextField, Button } from "@mui/material";
 
 function AddTaskForm({ onAddTask }: { onAddTask: any }) {
   const [newTask, setNewTask] = useState({
