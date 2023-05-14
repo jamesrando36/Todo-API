@@ -122,7 +122,7 @@ namespace Todo_API.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> PutTodoItem(long id, TodoItemUpdateDto todoItemUpdate)
         {
             if (!await _repository.TodoItemExistsAsync(id))
