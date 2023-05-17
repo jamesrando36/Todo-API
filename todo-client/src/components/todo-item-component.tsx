@@ -3,13 +3,7 @@ import axios from "axios";
 import { TodoItem } from "../interfaces/TodoItem";
 import AddTaskForm from "./add-todo-item-component";
 import DeleteTaskModal from "./delete-todo-item-component";
-import {
-  Container,
-  Typography,
-  Grid,
-  Card,
-  CardContent
-} from "@mui/material";
+import { Container, Typography, Grid, Card, CardContent } from "@mui/material";
 import EditTodoItem from "./edit-todo-item-component";
 
 function TodoList() {
@@ -52,7 +46,7 @@ function TodoList() {
       <Grid container spacing={2}>
         {todoItems.map((item) => (
           <Grid item key={item.id} xs={12} sm={6}>
-            <Card>
+            <Card sx={{ height: "100%" }}>
               <CardContent>
                 <Typography variant="h6" component="div">
                   {item.task}

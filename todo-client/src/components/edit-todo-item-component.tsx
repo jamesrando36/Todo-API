@@ -1,8 +1,17 @@
 import { useState } from "react";
 import { TodoItem } from "../interfaces/TodoItem";
-import { IconButton } from "@mui/material";
+import { Checkbox, IconButton } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@mui/material";
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+} from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import axios from "axios";
 
 interface EditTodoItemProps {
   todoItem: TodoItem;
@@ -16,7 +25,7 @@ function EditTodoItem({ todoItem, onTodoItemEdit }: EditTodoItemProps) {
     task: todoItem.task,
     description: todoItem.description,
     isComplete: todoItem.isComplete,
-    date: todoItem.date
+    date: todoItem.date,
   });
 
   const handleOpen = () => {
@@ -35,14 +44,35 @@ function EditTodoItem({ todoItem, onTodoItemEdit }: EditTodoItemProps) {
     setEditedTask({ ...editedTask, description: e.target.value });
   };
 
-  const handleSave = () => {
-    onTodoItemEdit(editedTask);
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditedTask({ ...editedTask, isComplete: e.target.checked });
+  };
+
+  const handleSave = async () => {
+    try {
+      // Make the API call to update the task
+      await axios.put(
+        `https://localhost:7083/api/TodoItems/${editedTask.id}`,
+        editedTask
+      );
+
+      // Call the onTodoItemEdit callback to update the task in the parent component
+      onTodoItemEdit(editedTask);
+    } catch (error) {
+      console.error("Error updating task:", error);
+    }
+
     handleClose();
   };
 
   return (
     <>
-      <IconButton aria-label="edit" onClick={handleOpen} size="small" color="primary">
+      <IconButton
+        aria-label="edit"
+        onClick={handleOpen}
+        size="small"
+        color="primary"
+      >
         <EditIcon />
       </IconButton>
       <Dialog open={open} onClose={handleClose}>
@@ -64,6 +94,13 @@ function EditTodoItem({ todoItem, onTodoItemEdit }: EditTodoItemProps) {
             onChange={handleDescriptionChange}
             margin="normal"
           />
+          <Checkbox
+            checked={editedTask.isComplete}
+            onChange={handleCheckboxChange}
+            icon={<CheckCircleIcon />}
+            checkedIcon={<CheckCircleIcon color="primary" />}
+          />
+          <span>Task completed?</span>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
