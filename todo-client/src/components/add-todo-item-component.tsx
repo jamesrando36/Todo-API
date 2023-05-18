@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Typography, TextField, Button } from "@mui/material";
 
@@ -12,6 +12,7 @@ function AddTaskForm({ onAddTask }: { onAddTask: any }) {
 
   const handleTaskChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewTask({ ...newTask, task: e.target.value });
+    setError(""); // Reset error when task input is modified
   };
 
   const handleDescriptionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,6 +39,20 @@ function AddTaskForm({ onAddTask }: { onAddTask: any }) {
       console.error("Error adding task:", error);
     }
   };
+
+  useEffect(() => {
+    const resetError = () => {
+      setError("");
+    };
+
+    document.addEventListener("click", resetError);
+    document.addEventListener("keydown", resetError);
+
+    return () => {
+      document.removeEventListener("click", resetError);
+      document.removeEventListener("keydown", resetError);
+    };
+  }, []);
 
   return (
     <form onSubmit={handleSubmit}>
