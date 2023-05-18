@@ -5,6 +5,8 @@ import AddTaskForm from "./add-todo-item-component";
 import DeleteTaskModal from "./delete-todo-item-component";
 import { Container, Typography, Grid, Card, CardContent } from "@mui/material";
 import EditTodoItem from "./edit-todo-item-component";
+import { Box } from "@mui/material";
+import zeroStateImage from "../assets/zero-state.png";
 
 function TodoList() {
   const [todoItems, setTodoItems] = useState<TodoItem[]>([]);
@@ -17,7 +19,6 @@ function TodoList() {
   const handleDeleteTask = (taskId: number) => {
     const updatedItems = todoItems.filter((item) => item.id !== taskId);
     setTodoItems(updatedItems);
-    
     const updatedCompletedTasks = completedTasks.filter(
       (item) => item.id !== taskId
     );
@@ -33,8 +34,19 @@ function TodoList() {
 
   useEffect(() => {
     async function fetchTodoItems() {
-      const response = await axios.get("https://localhost:7083/api/TodoItems");
-      setTodoItems(response.data);
+      try {
+        const response = await axios.get(
+          "https://localhost:7083/api/TodoItems"
+        );
+        setTodoItems(response.data);
+      } catch (error: any) {
+        if (error.response && error.response.status === 404) {
+          // Handle the 404 "Not Found" response
+          setTodoItems([]);
+        } else {
+          console.error("Error fetching todo items:", error);
+        }
+      }
     }
     fetchTodoItems();
   }, []);
@@ -87,10 +99,23 @@ function TodoList() {
         {completedTasks.length > 0 && "Completed Tasks"}
       </Typography>
 
+      {todoItems.length === 0 && (
+        <Box textAlign="center" marginTop="2em">
+          <Typography variant="h6" style={{ marginTop: "1em" }}>
+            There are currently no tasks created. Please create a task.
+          </Typography>
+          <img
+            src={zeroStateImage}
+            alt="No tasks"
+            style={{ width: "300px", height: "auto", marginTop: "1em" }}
+          />
+        </Box>
+      )}
+
       <Grid container spacing={2} style={{ marginTop: "1em" }}>
         {completedTasks.map((item) => (
           <Grid item key={item.id} xs={12} sm={6}>
-              <Card sx={{ height: "100%" }}>
+            <Card sx={{ height: "100%" }}>
               <CardContent>
                 <Typography variant="h6" component="div">
                   {item.task}
