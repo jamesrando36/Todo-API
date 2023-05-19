@@ -3,5 +3,6 @@ export interface TodoItem {
   task: string;
   isComplete: boolean;
   description: string;
-  date: Date;
+  taskTimestamp: string;
+  formattedTaskTimestamp: string;
 }

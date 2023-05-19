@@ -25,7 +25,8 @@ function EditTodoItem({ todoItem, onTodoItemEdit }: EditTodoItemProps) {
     task: todoItem.task,
     description: todoItem.description,
     isComplete: todoItem.isComplete,
-    date: todoItem.date,
+    taskTimestamp: todoItem.taskTimestamp,
+    formattedTaskTimestamp: todoItem.taskTimestamp
   });
 
   const handleOpen = () => {

@@ -7,5 +7,13 @@
         public bool IsComplete { get; set; }
         public string? Description { get; set; }
         public DateTime? TaskTimestamp { get; set; }
+
+        public string? FormattedTaskTimestamp
+        {
+            get
+            {
+                return TaskTimestamp?.ToString("yyyy-MM-dd HH:mm:ss");
+            }
+        }
     }
 }

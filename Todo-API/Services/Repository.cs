@@ -56,6 +56,11 @@ namespace Todo_API.Services
 
         public async Task CreateTodoItemAsync(TodoItem todoItem)
         {
+            if (todoItem.TaskTimestamp == null)
+            {
+                todoItem.TaskTimestamp = DateTime.Now;
+            }
+
             _context.TodoItems.Add(todoItem);
 
             await _context.SaveChangesAsync();

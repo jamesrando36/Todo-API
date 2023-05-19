@@ -81,6 +81,9 @@ function TodoList() {
                   <Typography color="text.secondary">
                     {item.description}
                   </Typography>
+                  <Typography color="text.secondary">
+                    {item.formattedTaskTimestamp}
+                  </Typography>
                   <DeleteTaskModal
                     taskId={item.id}
                     onConfirm={handleDeleteTask}
