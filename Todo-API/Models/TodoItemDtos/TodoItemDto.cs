@@ -11,5 +11,7 @@
         public string? Description { get; set; }
 
         public DateTime? TaskTimestamp { get; set; }
+
+        public string? FormattedTaskTimestamp { get; set; }
     }
 }

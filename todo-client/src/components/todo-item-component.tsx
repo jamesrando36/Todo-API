@@ -38,12 +38,8 @@ function TodoList() {
         const response = await axios.get(
           "https://localhost:7083/api/TodoItems"
         );
-        const todoItemsWithFormattedTimestamp = response.data.map((item: TodoItem) => ({
-          ...item,
-          formattedTaskTimestamp: item.taskTimestamp,
-        }));
-        
-        setTodoItems(todoItemsWithFormattedTimestamp);
+
+        setTodoItems(response.data);
       } catch (error: any) {
         if (error.response && error.response.status === 404) {
           // Handle the 404 "Not Found" response

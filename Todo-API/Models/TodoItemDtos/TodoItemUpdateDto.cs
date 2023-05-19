@@ -12,7 +12,5 @@ namespace Todo_API.Models.TodoItemDtos
 
         [MaxLength(100)]
         public string? Description { get; set; }
-
-        public DateTime? TaskTimestamp { get; set; }
     }
 }
