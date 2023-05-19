@@ -3,7 +3,7 @@ import axios from "axios";
 import { TodoItem } from "../interfaces/TodoItem";
 import AddTaskForm from "./add-todo-item-component";
 import DeleteTaskModal from "./delete-todo-item-component";
-import { Container, Typography, Grid, Card, CardContent } from "@mui/material";
+import { Container, Typography, Grid, Card, CardContent, CircularProgress } from "@mui/material";
 import EditTodoItem from "./edit-todo-item-component";
 import { Box } from "@mui/material";
 import zeroStateImage from "../assets/zero-state.png";
@@ -11,6 +11,7 @@ import zeroStateImage from "../assets/zero-state.png";
 function TodoList() {
   const [todoItems, setTodoItems] = useState<TodoItem[]>([]);
   const [completedTasks, setCompletedTasks] = useState<TodoItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleAddTask = (newTask: TodoItem) => {
     setTodoItems([...todoItems, newTask]);
@@ -40,6 +41,7 @@ function TodoList() {
         );
 
         setTodoItems(response.data);
+        setIsLoading(false);
       } catch (error: any) {
         if (error.response && error.response.status === 404) {
           // Handle the 404 "Not Found" response
@@ -47,8 +49,10 @@ function TodoList() {
         } else {
           console.error("Error fetching todo items:", error);
         }
+        setIsLoading(false);
       }
     }
+
     fetchTodoItems();
   }, []);
 
@@ -69,73 +73,81 @@ function TodoList() {
         <AddTaskForm onAddTask={handleAddTask} />
       </div>
 
-      <Grid container spacing={2}>
-        {todoItems
-          .filter((item) => !item.isComplete) // Filter out completed tasks
-          .map((item) => (
-            <Grid item key={item.id} xs={12} sm={6}>
-              <Card sx={{ height: "100%" }}>
-                <CardContent>
-                  <Typography variant="h6" component="div">
-                    {item.task}
-                  </Typography>
-                  <Typography color="text.secondary">
-                    {item.description}
-                  </Typography>
-                  <Typography color="text.secondary">
-                    {item.formattedTaskTimestamp}
-                  </Typography>
-                  <DeleteTaskModal
-                    taskId={item.id}
-                    onConfirm={handleDeleteTask}
-                  />
-                  <EditTodoItem
-                    todoItem={item}
-                    onTodoItemEdit={handleEditTask}
-                  />
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-      </Grid>
-
-      <Typography variant="h6" align="center" style={{ marginTop: "2em" }}>
-        {completedTasks.length > 0 && "Completed Tasks"}
-      </Typography>
-
-      {todoItems.length === 0 && (
+      {isLoading ? (
         <Box textAlign="center" marginTop="2em">
-          <Typography variant="h6" style={{ marginTop: "1em" }}>
-            There are currently no tasks created. Please create a task.
-          </Typography>
-          <img
-            src={zeroStateImage}
-            alt="No tasks"
-            style={{ width: "300px", height: "auto", marginTop: "1em" }}
-          />
+          <CircularProgress />
         </Box>
-      )}
-
-      <Grid container spacing={2} style={{ marginTop: "1em" }}>
-        {completedTasks.map((item) => (
-          <Grid item key={item.id} xs={12} sm={6}>
-            <Card sx={{ height: "100%" }}>
-              <CardContent>
-                <Typography variant="h6" component="div">
-                  {item.task}
-                </Typography>
-                <Typography color="text.secondary">
-                  {item.description}
-                </Typography>
-                <DeleteTaskModal
-                  taskId={item.id}
-                  onConfirm={handleDeleteTask}
-                />
-              </CardContent>
-            </Card>
+      ) : (
+        <>
+          <Grid container spacing={2}>
+            {todoItems
+              .filter((item) => !item.isComplete)
+              .map((item) => (
+                <Grid item key={item.id} xs={12} sm={6}>
+                  <Card sx={{ height: "100%" }}>
+                    <CardContent>
+                      <Typography variant="h6" component="div">
+                        {item.task}
+                      </Typography>
+                      <Typography color="text.secondary">
+                        {item.description}
+                      </Typography>
+                      <Typography color="text.secondary">
+                        {item.formattedTaskTimestamp}
+                      </Typography>
+                      <DeleteTaskModal
+                        taskId={item.id}
+                        onConfirm={handleDeleteTask}
+                      />
+                      <EditTodoItem
+                        todoItem={item}
+                        onTodoItemEdit={handleEditTask}
+                      />
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
           </Grid>
-        ))}
-      </Grid>
+
+          <Typography variant="h6" align="center" style={{ marginTop: "2em" }}>
+            {completedTasks.length > 0 && "Completed Tasks"}
+          </Typography>
+
+          {todoItems.length === 0 && (
+            <Box textAlign="center" marginTop="2em">
+              <Typography variant="h6" style={{ marginTop: "1em" }}>
+                There are currently no tasks created. Please create a task.
+              </Typography>
+              <img
+                src={zeroStateImage}
+                alt="No tasks"
+                style={{ width: "300px", height: "auto", marginTop: "1em" }}
+              />
+            </Box>
+          )}
+
+          <Grid container spacing={2} style={{ marginTop: "1em" }}>
+            {completedTasks.map((item) => (
+              <Grid item key={item.id} xs={12} sm={6}>
+                <Card sx={{ height: "100%" }}>
+                  <CardContent>
+                    <Typography variant="h6" component="div">
+                      {item.task}
+                    </Typography>
+                    <Typography color="text.secondary">
+                      {item.description}
+                    </Typography>
+                    <DeleteTaskModal
+                      taskId={item.id}
+                      onConfirm={handleDeleteTask}
+                    />
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </>
+      )}
     </Container>
   );
 }
