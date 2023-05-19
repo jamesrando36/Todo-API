@@ -27,6 +27,11 @@ function AddTaskForm({ onAddTask }: { onAddTask: any }) {
       return;
     }
 
+    if (newTask.description.length > 100) {
+      setError("Description cannot exceed 100 characters");
+      return;
+    }
+
     try {
       const response = await axios.post(
         "https://localhost:7083/api/TodoItems",
@@ -66,8 +71,12 @@ function AddTaskForm({ onAddTask }: { onAddTask: any }) {
         value={newTask.task}
         onChange={handleTaskChange}
         margin="normal"
-        error={error !== ""}
+        error={error !== "" && newTask.task === ""}
+        helperText={
+          error !== "" && newTask.task === "" ? "Task is required" : ""
+        }
       />
+
       <TextField
         fullWidth
         variant="outlined"
@@ -75,6 +84,12 @@ function AddTaskForm({ onAddTask }: { onAddTask: any }) {
         value={newTask.description}
         onChange={handleDescriptionChange}
         margin="normal"
+        error={error !== "" && newTask.description.length > 100}
+        helperText={
+          error !== "" && newTask.description.length > 100
+            ? "Description cannot exceed 100 characters"
+            : ""
+        }
       />
       <Button variant="contained" color="primary" type="submit">
         Add
