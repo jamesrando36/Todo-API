@@ -3,6 +3,7 @@ import axios from "axios";
 import { TodoItem } from "../interfaces/TodoItem";
 import AddTaskForm from "./add-todo-item-component";
 import DeleteTaskModal from "./delete-todo-item-component";
+import DeleteAllTasksComponent from "./delete-all-todo-item-component";
 import {
   Container,
   Typography,
@@ -11,7 +12,6 @@ import {
   CardContent,
   CircularProgress,
   Box,
-  Button,
 } from "@mui/material";
 import EditTodoItem from "./edit-todo-item-component";
 import zeroStateImage from "../assets/zero-state.png";
@@ -41,14 +41,9 @@ function TodoList() {
     setTodoItems(updatedItems);
   };
 
-  const handleDeleteAllTasks = async () => {
-    try {
-      await axios.delete("https://localhost:7083/api/TodoItems");
-      setTodoItems([]);
-      setCompletedTasks([]);
-    } catch (error) {
-      console.error("Error deleting all tasks:", error);
-    }
+  const handleDeleteAllTasks = () => {
+    setTodoItems([]);
+    setCompletedTasks([]);
   };
 
   useEffect(() => {
@@ -97,14 +92,7 @@ function TodoList() {
       <div style={{ marginBottom: "2em" }}>
         <AddTaskForm onAddTask={handleAddTask} />
         {todoItems.length >= 2 && (
-          <Button
-            variant="contained"
-            color="error"
-            style={{ marginTop: "0.5em" }}
-            onClick={handleDeleteAllTasks}
-          >
-            Delete All
-          </Button>
+          <DeleteAllTasksComponent onConfirm={handleDeleteAllTasks} />
         )}
       </div>
 
