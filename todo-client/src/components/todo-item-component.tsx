@@ -3,9 +3,17 @@ import axios from "axios";
 import { TodoItem } from "../interfaces/TodoItem";
 import AddTaskForm from "./add-todo-item-component";
 import DeleteTaskModal from "./delete-todo-item-component";
-import { Container, Typography, Grid, Card, CardContent, CircularProgress } from "@mui/material";
+import {
+  Container,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  CircularProgress,
+  Box,
+  Button,
+} from "@mui/material";
 import EditTodoItem from "./edit-todo-item-component";
-import { Box } from "@mui/material";
 import zeroStateImage from "../assets/zero-state.png";
 
 function TodoList() {
@@ -31,6 +39,16 @@ function TodoList() {
       item.id === editedTask.id ? editedTask : item
     );
     setTodoItems(updatedItems);
+  };
+
+  const handleDeleteAllTasks = async () => {
+    try {
+      await axios.delete("https://localhost:7083/api/TodoItems");
+      setTodoItems([]);
+      setCompletedTasks([]);
+    } catch (error) {
+      console.error("Error deleting all tasks:", error);
+    }
   };
 
   useEffect(() => {
@@ -64,13 +82,30 @@ function TodoList() {
   }, [todoItems]);
 
   return (
-    <Container maxWidth="sm" style={{ marginTop: "1em", marginBottom: "1em" }}>
+    <Container
+      maxWidth="sm"
+      style={{
+        marginTop: "1em",
+        marginBottom: "1em",
+        backgroundColor: "#f5f5f5",
+      }}
+    >
       <Typography variant="h4" align="center" gutterBottom>
         Todo List
       </Typography>
 
-      <div style={{ marginBottom: "5em" }}>
+      <div style={{ marginBottom: "2em" }}>
         <AddTaskForm onAddTask={handleAddTask} />
+        {todoItems.length >= 2 && (
+          <Button
+            variant="contained"
+            color="error"
+            style={{ marginTop: "0.5em" }}
+            onClick={handleDeleteAllTasks}
+          >
+            Delete All
+          </Button>
+        )}
       </div>
 
       {isLoading ? (
@@ -84,7 +119,7 @@ function TodoList() {
               .filter((item) => !item.isComplete)
               .map((item) => (
                 <Grid item key={item.id} xs={12} sm={6}>
-                  <Card sx={{ height: "100%" }}>
+                  <Card sx={{ height: "100%", backgroundColor: "#ffffff" }}>
                     <CardContent>
                       <Typography variant="h6" component="div">
                         {item.task}
@@ -95,14 +130,22 @@ function TodoList() {
                       <Typography color="text.secondary">
                         {item.formattedTaskTimestamp}
                       </Typography>
-                      <DeleteTaskModal
-                        taskId={item.id}
-                        onConfirm={handleDeleteTask}
-                      />
-                      <EditTodoItem
-                        todoItem={item}
-                        onTodoItemEdit={handleEditTask}
-                      />
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          marginTop: "1em",
+                        }}
+                      >
+                        <DeleteTaskModal
+                          taskId={item.id}
+                          onConfirm={handleDeleteTask}
+                        />
+                        <EditTodoItem
+                          todoItem={item}
+                          onTodoItemEdit={handleEditTask}
+                        />
+                      </Box>
                     </CardContent>
                   </Card>
                 </Grid>
@@ -129,7 +172,7 @@ function TodoList() {
           <Grid container spacing={2} style={{ marginTop: "1em" }}>
             {completedTasks.map((item) => (
               <Grid item key={item.id} xs={12} sm={6}>
-                <Card sx={{ height: "100%" }}>
+                <Card sx={{ height: "100%", backgroundColor: "#ffffff" }}>
                   <CardContent>
                     <Typography variant="h6" component="div">
                       {item.task}
@@ -137,10 +180,18 @@ function TodoList() {
                     <Typography color="text.secondary">
                       {item.description}
                     </Typography>
-                    <DeleteTaskModal
-                      taskId={item.id}
-                      onConfirm={handleDeleteTask}
-                    />
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        marginTop: "1em",
+                      }}
+                    >
+                      <DeleteTaskModal
+                        taskId={item.id}
+                        onConfirm={handleDeleteTask}
+                      />
+                    </Box>
                   </CardContent>
                 </Card>
               </Grid>
